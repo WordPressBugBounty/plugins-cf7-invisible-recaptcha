@@ -1,11 +1,12 @@
 === CF7 Invisible reCAPTCHA ===
 Contributors: vsourz1td
 Tags: contact-form-7-invisible-reCAPTCHA,CF7-Invisible-reCAPTCHA,invisible-reCAPTCHA
-Requires at least: 4.5
-Tested up to: 6.2
-Stable tag: 1.3.4
+Requires at least: 4.7
+Tested up to: 7.1
+Stable tag: 1.3.5
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Requires Plugins: contact-form-7
 
 CF7 Invisible reCAPTCHA plugin is an effective solution that secures your Contact form 7 forms on WordPress websites from spam entries while letting human pass over easily.
 
@@ -89,6 +90,11 @@ If you think, that you found a bug in our CF7 Invisible reCAPTCHA plugin or have
 1. General Settings.
 
 == Changelog ==
+
+= 1.3.5 =
+* Compatible with latest version wordpress 7.1
+* Compatible up to PHP 8.2
+* **Minor bug fix:** Security against cross-site scripting (XSS) vulnerability.
 
 = 1.3.4 =
 * Compatible with latest version wordpress 6.2

@@ -16,12 +16,12 @@
  * Plugin Name:       CF7 Invisible reCAPTCHA
  * Plugin URI:        https://wordpress.org/plugins/cf7-invisible-recaptcha/
  * Description:       Effective solution that secure your Contact form 7.
- * Version:           1.3.4
+ * Version:           1.3.5
  * Author:            Vsourz Digital
  * Author URI:        https://www.vsourz.com/
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       cf7-Invisible-recaptcha
+ * Text Domain:       cf7-invisible-recaptcha
  * Domain Path:       /languages
  */
 
@@ -29,7 +29,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
-
+define( 'CF7_CAPTCHA_VERSION', '1.3.5' );
 ///// Adding custom menu page
 add_action( 'admin_menu' ,'vsz_cf7_invisible_recaptcha',10);
 
@@ -39,7 +39,7 @@ function vsz_cf7_invisible_recaptcha(){
 	$_wp_last_object_menu++;
 
 	add_menu_page(
-		__( 'Invisible reCAPTCHA', 'textdomain' ),
+		__( 'Invisible reCAPTCHA', 'cf7-invisible-recaptcha' ),
 		'Invisible reCAPTCHA',
 		'manage_options',
 		'cf7-Invisible-recaptcha',
@@ -52,6 +52,13 @@ function vsz_cf7_invisible_recaptcha(){
 
 ////// Callback function for custom menu
 function vsz_cf7_invisible_recaptcha_page(){
+	
+	// SECURITY: Verify admin capability
+	if (!current_user_can('manage_options')) {
+		wp_die(esc_html__('You do not have permission to access this page.', 'cf7-invisible-recaptcha'));
+	}
+	
+	
 	$tab = isset($_GET["tab"]) ? sanitize_text_field($_GET["tab"]) : "settings";
 	$tab_id = isset($_POST['tab_id'])&& !empty($_POST['tab_id']) ? sanitize_text_field($_POST['tab_id']) : "";
 	$successMsg = "";
@@ -60,7 +67,7 @@ function vsz_cf7_invisible_recaptcha_page(){
 	if(isset($_POST["submit-settings"])){
 		if( ! wp_verify_nonce($tab_id, 'submit-settings')){
 
-            wp_die("You don't have permission to view this page");
+            wp_die(esc_html__("You don't have permission to view this page", 'cf7-invisible-recaptcha'));
             exit;
         }
 		$sitekey = sanitize_text_field($_POST['sitekey']);
@@ -91,8 +98,7 @@ function vsz_cf7_invisible_recaptcha_page(){
 	// Contact Form submit
 	else if(isset($_POST["submit-cf7"])){
 		if( ! wp_verify_nonce($tab_id, 'submit-cf7')){
-
-            wp_die("You don't have permission to view this page");
+            wp_die(esc_html__("You don't have permission to view this page", 'cf7-invisible-recaptcha'));
             exit;
         }
 		if(isset($_POST['enable'])){
@@ -117,8 +123,8 @@ function vsz_cf7_invisible_recaptcha_page(){
 	// This hook can be used to save custom fields
 	$successMsg = apply_filters('cf7-Invisible-recaptcha-admin-submit-form',$successMsg);
 
-	wp_enqueue_style("admin_css",plugin_dir_url(__FILE__)."css/admin.css");
-	wp_enqueue_style("font_awesome_css",plugin_dir_url(__FILE__)."css/font-awesome.css");
+	wp_enqueue_style("admin_css",plugin_dir_url(__FILE__)."css/admin.css", array(), CF7_CAPTCHA_VERSION, 'all');
+	wp_enqueue_style("font_awesome_css",plugin_dir_url(__FILE__)."css/font-awesome.css", array(), CF7_CAPTCHA_VERSION, 'all');
 
 	?><div class="wrap">
 		<!--
@@ -135,7 +141,7 @@ function vsz_cf7_invisible_recaptcha_page(){
 		if(isset($successMsg) && !empty($successMsg)){
 			?><div class="updated notice notice-success is-dismissible">
 				<p><?php
-					echo $successMsg;
+					echo esc_html($successMsg);
 				?></p>
 				<button type="button" class="notice-dismiss">
 					<span class="screen-reader-text">Dismiss this notice.</span>
@@ -148,30 +154,34 @@ function vsz_cf7_invisible_recaptcha_page(){
 		if ( is_plugin_active( 'invisible-recaptcha/invisible-recaptcha.php' ) ) {
 			?><div class="error">
 				<p>
-					It seems that <b>"Invisible reCaptcha"</b> plugin is active and conflicts with this plugin functionality. </br>
-					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php admin_url(); ?>plugins.php">here</a>.
+					It seems that <b>"Invisible reCaptcha"</b> plugin is active and conflicts with this plugin functionality. <br/>
+					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php echo esc_url(admin_url('plugins.php')); ?>">here</a>.
 				</p>
 			</div><?php
 		}
 		if ( is_plugin_active( 'wp-cerber/wp-cerber.php' ) ) {
 			?><div class="error">
 				<p>
-					It seems that <b>"WP Cerber Security & Antispam"</b> plugin is active and conflicts with this plugin functionality. </br>
-					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php admin_url(); ?>plugins.php">here</a>.
+					It seems that <b>"WP Cerber Security & Antispam"</b> plugin is active and conflicts with this plugin functionality. <br/>
+					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php echo esc_url(admin_url('plugins.php')); ?>">here</a>.
 				</p>
 			</div><?php
 		}
 		if ( is_plugin_active( 'google-captcha/google-captcha.php' ) ) {
 			?><div class="error">
 				<p>
-					It seems that <b>"Google Captcha (reCAPTCHA) by BestWebSoft"</b> plugin is active and conflicts with this plugin functionality. </br>
-					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php admin_url(); ?>plugins.php">here</a>.
+					It seems that <b>"Google Captcha (reCAPTCHA) by BestWebSoft"</b> plugin is active and conflicts with this plugin functionality. <br/>
+					Kindly remove it, to get better performance. You can deactivate it from :<a href="<?php echo esc_url(admin_url('plugins.php')); ?>">here</a>.
 				</p>
 			</div><?php
 		}
+		
+		$generalSettingsTabLink = admin_url("admin.php?page=cf7-Invisible-recaptcha&tab=settings");
+		$contactFormsTabLink = admin_url("admin.php?page=cf7-Invisible-recaptcha&tab=cf7");
+		
 		?><div id="" class="mch-module-tabs cf7-head">
-			<a class="tablinks <?php if($tab == 'settings'){ echo 'active';}?>" href="<?php echo admin_url(); ?>admin.php?page=cf7-Invisible-recaptcha&tab=settings">General Settings</a>
-			<a class="tablinks <?php if($tab == 'cf7'){ echo 'active';}?>" href="<?php echo admin_url(); ?>admin.php?page=cf7-Invisible-recaptcha&tab=cf7">Contact Forms</a><?php
+			<a class="tablinks <?php if($tab == 'settings'){ echo 'active';}?>" href="<?php echo esc_url($generalSettingsTabLink); ?>"><?php echo esc_html__("General Settings", 'cf7-invisible-recaptcha'); ?></a>
+			<a class="tablinks <?php if($tab == 'cf7'){ echo 'active';}?>" href="<?php echo esc_url($contactFormsTabLink); ?>"><?php echo esc_html__("Contact Forms", 'cf7-invisible-recaptcha'); ?></a><?php
 			//This hook is used to add custom tabs
 			do_action('cf7-Invisible-recaptcha-admin-page-tabs',$tab);
 		?></div>
@@ -186,19 +196,17 @@ function vsz_cf7_invisible_recaptcha_page(){
 			$button_class= get_option('invisible_recaptcha_button_class');
 			
 			?><div class="mch-settings-section-header">
-				<h3>
-					General Settings
-				</h3>
+				<h3><?php echo esc_html__("General Settings", 'cf7-invisible-recaptcha'); ?></h3>
 			</div>
 			<table class="form-table">
 				<tbody>
 					<tr>
-						<th scope="row"><label for="sitekey" >Site Key</label></th>
-						<td><input name="sitekey" id="sitekey" class="regular-text vsz_captcha_site_key" type="text" value="<?php if(isset($site_key) && !empty($site_key)){ echo $site_key;}?>"></td>
+						<th scope="row"><label for="sitekey" ><?php echo esc_html__("Site Key", 'cf7-invisible-recaptcha'); ?></label></th>
+						<td><input name="sitekey" id="sitekey" class="regular-text vsz_captcha_site_key" type="text" value="<?php if(isset($site_key) && !empty($site_key)){ echo esc_attr($site_key);}?>"></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="secretkey" >Secret Key</label></th>
-						<td><input name="secretkey" id="secretkey" class="regular-text" type="text" value="<?php if(isset($secretkey) && !empty($secretkey)){ echo $secretkey;}?>"></td>
+						<th scope="row"><label for="secretkey" ><?php echo esc_html__("Secret Key", 'cf7-invisible-recaptcha'); ?></label></th>
+						<td><input name="secretkey" id="secretkey" class="regular-text" type="text" value="<?php if(isset($secretkey) && !empty($secretkey)){ echo esc_attr($secretkey);}?>"></td>
 					</tr>
 					<tr>
 						<th scope="row"><label></label></th>
@@ -211,7 +219,7 @@ function vsz_cf7_invisible_recaptcha_page(){
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="badge" >Display Badge</th>
+						<th scope="row"><label for="badge" ><?php echo esc_html__("Display Badge", 'cf7-invisible-recaptcha'); ?></th>
 						<td>
 							<select name="badge" id="badge">
 								<option value="yes" <?php if(isset($badge) && $badge== 'yes'){ ?>selected="selected"<?php } ?>>Yes</option>
@@ -220,37 +228,38 @@ function vsz_cf7_invisible_recaptcha_page(){
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="badge-position" >Badge Position</label></th>
+						<th scope="row"><label for="badge-position" > <?php echo esc_html__("Badge Position", 'cf7-invisible-recaptcha'); ?></label></th>
 						<td>
 							<select name="badge_position" id="badge-position">
-								<option value="bottomright" <?php if(isset($badge_position) && $badge_position== 'bottomright'){ ?>selected="selected"<?php } ?>>Bottom Right</option>
-								<option value="bottomleft" <?php if(isset($badge_position) && $badge_position== 'bottomleft'){ ?>selected="selected"<?php } ?>>Bottom Left</option>
-								<option value="inline" <?php if(isset($badge_position) && $badge_position== 'inline'){ ?>selected="selected"<?php } ?>>Inline</option>
+								<option value="bottomright" <?php if(isset($badge_position) && $badge_position== 'bottomright'){ ?>selected="selected"<?php } ?>><?php echo esc_html__("Bottom Right", 'cf7-invisible-recaptcha'); ?></option>
+								<option value="bottomleft" <?php if(isset($badge_position) && $badge_position== 'bottomleft'){ ?>selected="selected"<?php } ?>><?php echo esc_html__("Bottom Left", 'cf7-invisible-recaptcha'); ?></option>
+								<option value="inline" <?php if(isset($badge_position) && $badge_position== 'inline'){ ?>selected="selected"<?php } ?>> <?php echo esc_html__("Inline", 'cf7-invisible-recaptcha'); ?></option>
 							</select>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="badge-position" >Button Class</label></th>
+						<th scope="row"><label for="badge-position" ><?php echo esc_html__("Button Class", 'cf7-invisible-recaptcha'); ?></label></th>
 						<td>
-							<input name="button_class" id="button_class" class="regular-text vsz_captcha_button_class" type="text" value="<?php if(isset($button_class) && !empty($button_class)){ echo $button_class;}?>">
+							<input name="button_class" id="button_class" class="regular-text vsz_captcha_button_class" type="text" value="<?php if(isset($button_class) && !empty($button_class)){ echo esc_attr($button_class);}?>">
 						</td>
 					</tr>
 				</tbody>
 			</table>
 			<p class="submit">
-				<input type="hidden" name="tab_id" value="<?php echo wp_create_nonce('submit-settings'); ?>">
-				<input name="submit-settings" id="submit" class="button button-primary" value="Save Changes" type="submit">
+				<input type="hidden" name="tab_id" value="<?php echo esc_attr(wp_create_nonce('submit-settings')); ?>">
+				<input name="submit-settings" id="submit" class="button button-primary" value="<?php echo esc_html__("Save Changes", 'cf7-invisible-recaptcha'); ?>" type="submit">
 			</p>
 			<div class="cf7_captcha_notice_outer notice">
-				<p class="note">Note:</p>
+				<p class="note"><?php echo esc_html__("Note:", 'cf7-invisible-recaptcha'); ?></p>
 				<ul class="cf7_captcha_notice">
 					<li>
-						<i class="fa fa-hand-o-right"></i>
-						It is possible that some or all functions may not work proper if you are using some other invisible recaptcha functionality providing plugin.
+						<i class="fa fa-hand-o-right"></i><?php echo esc_html__("It is possible that some or all functions may not work proper if you are using some other invisible recaptcha functionality providing plugin.", 'cf7-invisible-recaptcha'); ?>
+						
 					</li>
 					<li>
 						<i class="fa fa-hand-o-right"></i>
-						It is advisable to validate your key before saving.
+						<?php echo esc_html__("It is advisable to validate your key before saving.", 'cf7-invisible-recaptcha'); ?>
+						
 					</li><?php
 						//This hook is used to add custom notes
 						do_action('cf7-Invisible-recaptcha-admin-page-gs-notes');
@@ -265,28 +274,26 @@ function vsz_cf7_invisible_recaptcha_page(){
 			$exclude = get_option('invisible_recaptcha_badge_exclude');
 
 			?><div class="mch-settings-section-header">
-				<h3>
-					Contact Forms
-				</h3>
+				<h3><?php echo esc_html__("Contact Forms", 'cf7-invisible-recaptcha'); ?></h3>
 			</div>
 			<table class="form-table">
 				<tbody>
 					<tr>
-						<th scope="row"><label for="enable" >Enable Protection for Contact Form 7</label></th>
+						<th scope="row"><label for="enable" ><?php echo esc_html__("Enable Protection for Contact Form 7", 'cf7-invisible-recaptcha'); ?></label></th>
 						<td><input name="enable" id="enable" class="regular-text vsz_captcha_active" type="checkbox" value="1" <?php if(isset($enable) && $enable == 1){ ?>checked <?php } ?> /></td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="exclude" >Excluded Forms IDs</label></th>
+						<th scope="row"><label for="exclude" ><?php echo esc_html__("Excluded Forms IDs", 'cf7-invisible-recaptcha'); ?></label></th>
 						<td>
-							<input name="exclude" id="exclude" class="regular-text" type="text" value="<?php if(isset($exclude) && !empty($exclude)){ echo $exclude;}?>">
-							<p class="description">A list of comma separated  Forms IDs which should not be protected by Invisible reCaptcha</p>
+							<input name="exclude" id="exclude" class="regular-text" type="text" value="<?php if(isset($exclude) && !empty($exclude)){ echo esc_attr($exclude);}?>">
+							<p class="description"><?php echo esc_html__("A list of comma separated  Forms IDs which should not be protected by Invisible reCaptcha", 'cf7-invisible-recaptcha'); ?></p>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 			<p class="submit">
-				<input type="hidden" name="tab_id" value="<?php echo wp_create_nonce('submit-cf7'); ?>">
-				<input name="submit-cf7" id="submit" class="button button-primary" value="Save Changes" type="submit">
+				<input type="hidden" name="tab_id" value="<?php echo esc_attr(wp_create_nonce('submit-cf7')); ?>">
+				<input name="submit-cf7" id="submit" class="button button-primary" value="<?php echo esc_html__("Save Changes", 'cf7-invisible-recaptcha'); ?>" type="submit">
 			</p>
 			<!-- Changed dated 17-04-2023 -->
 			<div class="recaptcha-holder-section">
@@ -370,7 +377,7 @@ function vsz_cf7_invisible_recaptcha_page(){
 
 		});
 
-		var ajax_nonce = "<?php echo wp_create_nonce( "checksecretkey" );?>";
+		var ajax_nonce = "<?php echo esc_js(wp_create_nonce( "checksecretkey" ));?>";
 		var renderGoogleInvisibleRecaptcha = function() {
 			//Changed dated 17-04-2023
 			if(jQuery(".recaptcha-holder").length == 0){
@@ -444,7 +451,7 @@ if(isset($enable) && $enable == 1){
 function vsz_cf7_invisible_recaptcha_page_scripts(){
 	
 	// Enqueue default functions
-	wp_enqueue_script("cf7_invisible_recaptcha_functions", plugin_dir_url( __FILE__ )."js/cf7_invisible_recaptcha.js" ,array( 'jquery' ), '1.2.3', false);
+	wp_enqueue_script("cf7_invisible_recaptcha_functions", plugin_dir_url( __FILE__ )."js/cf7_invisible_recaptcha.js" ,array( 'jquery' ), CF7_CAPTCHA_VERSION, false);
 	
 	$site_key = get_option('invisible_recaptcha_sitekey');
 	$secretkey= get_option('invisible_recaptcha_secretkey');
@@ -454,6 +461,24 @@ function vsz_cf7_invisible_recaptcha_page_scripts(){
 	$button_class= get_option('invisible_recaptcha_button_class');
 	//get comma separated id
 	$exclude = explode(',',$exclude);
+
+	//added in 1.3.5
+	foreach($exclude as $key=>$val){		
+		if(defined('WPCF7_VERSION') && version_compare(WPCF7_VERSION, '5.8', '>=')){
+			$objForm = wpcf7_get_contact_form_by_hash(trim($val));
+
+			if(empty($objForm) || $objForm == NULL) {
+				$exclude[$key] = $val;
+			} else {
+				$exclude[$key] = (string) $objForm->id;
+				
+			}
+		}
+		else{
+			$exclude[$key] = $val;
+		}
+	}
+
 	?>
 
 	<style>
@@ -496,7 +521,7 @@ function vsz_cf7_invisible_recaptcha_page_scripts(){
 				<?php
 					if(isset($exclude) && !empty($exclude) && $exclude[0] != ''){
 						foreach($exclude as $data){ ?>
-							if(value == <?php echo $data;?>){
+							if(value == <?php echo esc_js($data);?>){
 								checkexclude = 1;
 								form.find('.wpcf7-submit').show();
 							}
@@ -513,13 +538,13 @@ function vsz_cf7_invisible_recaptcha_page_scripts(){
 
 					// Add custom button and recaptcha holder
 
-					form.find('.wpcf7-submit').after('<input type="button" id="wpcf-custom-btn-'+index+'" class="'+btnClasses+' <?php echo $button_class; ?> recaptcha-btn recaptcha-btn-type-css" value="'+btnValue+'" title="'+btnValue+'" >');
+					form.find('.wpcf7-submit').after('<input type="button" id="wpcf-custom-btn-'+index+'" class="'+btnClasses+' <?php echo esc_attr($button_class); ?> recaptcha-btn recaptcha-btn-type-css" value="'+btnValue+'" title="'+btnValue+'" >');
 					form.append('<div class="recaptcha-holder" id="recaptcha-holder-'+index+'"></div>');
 					// Recaptcha rendenr from here
 					var holderId = grecaptcha.render('recaptcha-holder-'+index,{
-								'sitekey':'<?php $site_key = get_option('invisible_recaptcha_sitekey'); if(isset($site_key) && !empty($site_key)){ echo $site_key;}?>',
+								'sitekey':'<?php $site_key = get_option('invisible_recaptcha_sitekey'); if(isset($site_key) && !empty($site_key)){ echo esc_js($site_key);}?>',
 								'size': 'invisible',
-								'badge' : '<?php echo $badge_position;?>', // possible values: bottomright, bottomleft, inline
+								'badge' : '<?php echo esc_js($badge_position);?>', // possible values: bottomright, bottomleft, inline
 								'callback' : function (recaptchaToken) {
 									//console.log(recaptchaToken);
 									var response=jQuery('#recaptcha-holder-'+index).find('.g-recaptcha-response').val();
@@ -584,34 +609,54 @@ function vsz_cf7_invisible_recaptcha_page_scripts(){
 
 // Check user secret key
 add_action('wp_ajax_vsz_cf7_secret_key','vsz_cf7_vsz_cf7_secret_key_callback');
-add_action('wp_ajax_nopriv_vsz_cf7_secret_key','vsz_cf7_vsz_cf7_secret_key_callback');
 function vsz_cf7_vsz_cf7_secret_key_callback(){
+
+	// SECURITY: Verify user is authenticated and has admin capability
+	if (!is_user_logged_in() || !current_user_can('manage_options')) {
+		wp_die(esc_html__('Unauthorized access', 'cf7-invisible-recaptcha'));
+	}
 
 	if(isset($_POST['ajax_nonce']) && !empty($_POST['ajax_nonce'])){
 		////// checking for nonce
 		if( ! wp_verify_nonce($_POST['ajax_nonce'], 'checksecretkey')){
 
-			wp_die("You don't have permission to view this page");
+			wp_die(esc_html__("You don't have permission to view this page", 'cf7-invisible-recaptcha'));
 			exit;
 		}
 		if(isset($_POST["token"]) && !empty($_POST["token"]) && isset($_POST["secretkey"]) && !empty($_POST["secretkey"])){
 			$secret= sanitize_text_field($_POST["secretkey"]);
-			$remoteip = $_SERVER["REMOTE_ADDR"];
+			$remoteip = sanitize_text_field($_SERVER["REMOTE_ADDR"]);
 			$response = sanitize_text_field($_POST["token"]);
 			if(isset($response)){
-				$recaptcha = wp_remote_retrieve_body(wp_remote_get( add_query_arg( array(
+				$api_response = wp_remote_get( add_query_arg( array(
 					'secret'   => $secret,
 					'response' => $response,
 					'remoteip' => $remoteip
-				), 'https://www.google.com/recaptcha/api/siteverify' ) ));
+				), 'https://www.google.com/recaptcha/api/siteverify' ) );
+				
+				
+				// SECURITY: Check for WP_Error before processing
+				if( is_wp_error( $api_response ) ) {
+					
+					echo esc_html__("Invalid", 'cf7-invisible-recaptcha');
+					exit;
+				}
+				
+				$recaptcha = wp_remote_retrieve_body( $api_response );
+				$recaptcha = json_decode($recaptcha, true);
+				
+				// SECURITY: Validate JSON decode
+				if($recaptcha === null) {
+					echo esc_html__("Invalid", 'cf7-invisible-recaptcha');
+					exit;
+				}
 
 				//varify response
-				$recaptcha = json_decode($recaptcha,'array');
 				if (isset($recaptcha["success"]) && $recaptcha["success"] == 'true'){
-					echo "Valid";
+					echo esc_html__("Valid", 'cf7-invisible-recaptcha');
 					exit;
 				}else{
-					echo "Invalid";
+					echo esc_html__("Invalid", 'cf7-invisible-recaptcha');
 					exit;
 				}
 			}
@@ -646,15 +691,16 @@ function vsz_filter_wpcf7_validate( $result, $tags ) {
 
 		global $cf7ic_spam_entry;
 		$cf7ic_spam_entry = false;
+	
 
-
-		$form_id = 	sanitize_text_field($_POST['_wpcf7']);
+		$form_id = 	absint($_POST['_wpcf7']);
 		if(!isset($form_id) || empty($form_id)){
 			return $result;
 		}
 
 		$exclude = get_option('invisible_recaptcha_badge_exclude');
-		$exclude = explode(',',$exclude);
+		$exclude = !empty($exclude) ? array_map('absint', array_filter(array_map('trim', explode(',', $exclude)))) : array();
+		
 		if(isset($exclude) && !empty($exclude) && $exclude[0] != ''){
 			foreach($exclude as $data){
 				if($data == $form_id){
@@ -665,18 +711,34 @@ function vsz_filter_wpcf7_validate( $result, $tags ) {
 
 		if(isset($_POST["g-recaptcha-response"])){
 
-			$remoteip = $_SERVER["REMOTE_ADDR"];
-			$response = sanitize_text_field($_POST["g-recaptcha-response"]);
+			$remoteip = sanitize_text_field($_SERVER["REMOTE_ADDR"]);
+			$response = sanitize_textarea_field($_POST["g-recaptcha-response"]);
 			$secretkey= get_option('invisible_recaptcha_secretkey');
 			if(isset($response)){
-				$recaptcha = wp_remote_retrieve_body(wp_remote_get( add_query_arg( array(
+				
+				$api_response = wp_remote_get( add_query_arg( array(
 					'secret'   => $secretkey,
 					'response' => $response,
 					'remoteip' => $remoteip
-				), 'https://www.google.com/recaptcha/api/siteverify' ) ));
-
-				//varify response
-				$recaptcha = json_decode($recaptcha,'array');
+				), 'https://www.google.com/recaptcha/api/siteverify' ) );
+				
+				
+				// SECURITY: Check for WP_Error before processing
+				if ( is_wp_error( $api_response ) ) {
+					$cf7ic_spam_entry = true;
+					$result->invalidate($tags[0], '');
+					return $result;
+				}
+				
+				$recaptcha = wp_remote_retrieve_body( $api_response );
+				$recaptcha = json_decode($recaptcha, true);
+				
+				// SECURITY: Validate JSON decode
+				if ($recaptcha === null) {
+					$cf7ic_spam_entry = true;
+					$result->invalidate($tags[0], '');
+					return $result;
+				}
 
 				if (isset($recaptcha["success"]) && $recaptcha["success"] == 'true'){
 					$cf7ic_spam_entry = false;
@@ -721,14 +783,12 @@ function additional_cf7_form_elements($elements){
 
 	if(!empty($formMsgs)){
 		$elements .= "<script type='text/javascript'>
-
 						if(contactform === undefined){
 							var contactform = [];
-						}
-						";
+						}";
 		$i = 0;
 		foreach($formMsgs as $key => $val){
-			$val = htmlentities(addslashes($val));
+			$val = wp_json_encode($val);
 			$elements .= "var innerVal = [".$formId.",'".$key."','".$val."'];
 						contactform.push(innerVal);
 						";
@@ -736,10 +796,11 @@ function additional_cf7_form_elements($elements){
 		}
 
 		// For GDPR related message
-		$elements .= "var innerVal = [".$formId.",'gdpr','".$gdpr_msg[$formId]."'];
+		$gdpr_msg_safe = isset($gdpr_msg[$formId]) ? wp_json_encode($gdpr_msg[$formId]) : wp_json_encode('');
+		$elements .= "var innerVal = [".$formId.",'gdpr',".$gdpr_msg_safe."];
 						contactform.push(innerVal);
 						";
-
+	
 		$elements .= "</script>";
 	}
 
